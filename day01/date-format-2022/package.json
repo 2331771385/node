@@ -1,0 +1,8 @@
+{
+    "name": "date-format-2022",
+    "version": "1.0.0",
+    "main": "index.js",
+    "description": "对时间进行封装、转化HTML中特殊字符、还原HTML中特殊字符的函数",
+    "keywords": ["dateformat", "htmlEacape", "htmlUnEacape"],
+    "license": "ISC"
+}
