@@ -25,8 +25,11 @@
 const express = require('express');
 var app = express(); // 快速创建web服务器
 
-// 引入视图引擎模块
+// 引入视图引擎模块,创建默认布局main，如果不特别指明，所有视图都用这个布局
 var handlebars = require('express3-handlebars').create({defaultLayout: 'main'});
+
+// 引入自己封装的模块fortune，
+var fortune = require('./lib/fortune');
 
 // 设置了handlebars视图引擎
 app.engine('handlebars', handlebars.engine);
@@ -35,9 +38,14 @@ app.set('view engine', 'handlebars');
 // 设置服务器的端口,如果没有设置process.env.PORT这个参数，就使用默认的端口3000
 app.set('port', process.env.PORT || 3000);
 
+// static中间件可以将一个或多个目录转换为包含静态资源的目录
+// 目录不需要经过任何处理直接发送给客户端
+// static中间件放在所有的路由之前
+// 这个中间件相当于给想要发送的静态资源创建了一个路由，渲染文件并发送给客户端
+app.use(express.static(__dirname + '/public'))
+
 // 分配不同的路由
 app.get('/', function (req, res) {
-    console.log('=======');
     // res.type('text/plain');
     // res.send('Meadowlark Travel')
 
@@ -49,7 +57,9 @@ app.get('/', function (req, res) {
 app.get('/about', function (req, res) {
     // res.type('text/plain');
     // res.send('About Meadowlark Travel')
-    res.render('about')
+
+    // 引入自己封装的模块，直接使用exports暴露出来的方法getFortune()
+    res.render('about', {fortune: fortune.getFortune()})
 })
 
 // 当路由匹配不到的时候，就会执行这个中间件,在使用app.use()封装中间件的时候，需要使用res.status()返回状态码
