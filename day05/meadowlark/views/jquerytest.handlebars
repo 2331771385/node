@@ -1,0 +1,12 @@
+{{! 这样我们就可以在head中添加东西，并且执行jQuery代码}}
+{{#section 'head'}}
+    <meta name="robots" content="noindex">
+{{/section}}
+
+<h1>Test page</h1>
+
+{{#section 'jquery'}}
+    <script>
+        console.log('插入成功')
+    </script>
+{{/section}}

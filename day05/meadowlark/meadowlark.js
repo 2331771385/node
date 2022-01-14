@@ -21,6 +21,10 @@
  * 当使用视图的新路由替换旧路由的时候
  * 不需要指定返回的类型和状态码：视图引擎默认会返回text/html的内容类型以及200的状态码
  * 
+ * 
+ * 当我们使用express3-handlebars模块创建视图引擎的时候，会指定一个默认的布局
+ * require('express3-handlebars').create({defaultLayout: 'main'})
+ * 默认情况下express会在views的子目录中查找视图，在views子目录的layouts目录下查找布局
  */
 const express = require('express');
 var app = express(); // 快速创建web服务器
@@ -30,10 +34,11 @@ var handlebars = require('express3-handlebars').create({defaultLayout: 'main'});
 
 // 引入自己封装的模块fortune，
 var fortune = require('./lib/fortune');
+var weather = require('./lib/weather');
 
 // 设置了handlebars视图引擎
-app.engine('handlebars', handlebars.engine);
-app.set('view engine', 'handlebars');
+app.engine('handlebars', handlebars.engine); // 用来将特定的模板转换为HTML文件，在render的时候调用
+app.set('view engine', 'handlebars'); // 模板engine使用的适配的后缀名
 
 // 设置服务器的端口,如果没有设置process.env.PORT这个参数，就使用默认的端口3000
 app.set('port', process.env.PORT || 3000);
@@ -50,6 +55,7 @@ app.get('/', function (req, res) {
     // res.send('Meadowlark Travel')
 
     // 使用这些视图的新路由替换旧路由.render()就是渲染指定的视图页面为HTML
+    // 默认情况下，express会在views目录下查找视图
     res.render('home')
 });
 
@@ -60,6 +66,19 @@ app.get('/about', function (req, res) {
 
     // 引入自己封装的模块，直接使用exports暴露出来的方法getFortune()
     res.render('about', {fortune: fortune.getFortune()})
+})
+
+// 封装天气的路由，用于访问
+app.get('/weather', function (req, res) {
+    res.render('weather')
+})
+
+// 天气插件，封装一个天气的插件，用于访问
+app.use(function (req, res, next) {
+    if (!res.locals.partials) {
+        res.locals.partials = {};
+    }
+    res.locals.partials.weather = weather.getWeather();
 })
 
 // 当路由匹配不到的时候，就会执行这个中间件,在使用app.use()封装中间件的时候，需要使用res.status()返回状态码
@@ -74,8 +93,6 @@ app.use(function (req, res, next) {
 })
 
 app.use(function (err, req, res, next) {
-    console.log('服务器发生错误');
-    console.log(err);
     res.status(500);
     res.render('500');
 })
